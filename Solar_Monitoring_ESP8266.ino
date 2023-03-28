@@ -11,6 +11,13 @@ WiFiClient client;
 HTTPClient httpClient;
 //=========================================================================================================//
 
+//==============================================DHT Sensor================================================//
+#include "DHT.h"
+#define DHTPIN 5 // pin D1 pada esp8266;
+#define DHTTYPE DHT11   // DHT 11
+DHT dht(DHTPIN, DHTTYPE);
+float h,t;
+//=========================================================================================================//
 
 void setup() {
   Serial.begin(9600);
@@ -23,16 +30,27 @@ void setup() {
   Serial.println("Connected");
   //==============================================================================//
 
+  dht.begin(); // mulai DHT
 }
 
 void loop() {
+  //=================================membaca kelembapan dan suhu=================//
+  h = dht.readHumidity();
+  t = dht.readTemperature();
+  if (isnan(h) || isnan(t)) {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    h = 0;
+    t = 0;
+  }
+  //=============================================================================//
+
   
-  uploadData(200, 12, 5, 120, 38);
+  uploadData(200, 12, 5, h, t);
   delay(5000);
 }
 
 
-void uploadData(int intensitas, float tegangan, float arus, int humidity, int temperature) {
+void uploadData(int intensitas, float tegangan, float arus, float humidity, float temperature) {
   String data = "tegangan=";
   data += String(tegangan);
   data += "&intensitas=";
