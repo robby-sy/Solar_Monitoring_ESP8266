@@ -13,10 +13,17 @@ HTTPClient httpClient;
 
 //==============================================DHT Sensor================================================//
 #include "DHT.h"
-#define DHTPIN 5 // pin D1 pada esp8266;
+#define DHTPIN 14 // pin D5 pada esp8266;
 #define DHTTYPE DHT11   // DHT 11
 DHT dht(DHTPIN, DHTTYPE);
 float h,t;
+//=========================================================================================================//
+
+//=============================================lux meter===================================================//
+#include <BH1750.h>
+#include <Wire.h>
+BH1750 lightMeter;
+float lux;
 //=========================================================================================================//
 
 void setup() {
@@ -31,6 +38,8 @@ void setup() {
   //==============================================================================//
 
   dht.begin(); // mulai DHT
+  Wire.begin(); // mulai i2c connection untuk sensor intentsitas
+  lightMeter.begin(); //mulai sensor intensitas cahaya
 }
 
 void loop() {
@@ -40,12 +49,14 @@ void loop() {
   if (isnan(h) || isnan(t)) {
     Serial.println(F("Failed to read from DHT sensor!"));
     h = 0;
-    t = 0;
-  }
+    t = 0;}
   //=============================================================================//
 
+  //=================================membaca intensitas cahaya===================//
+  lux = lightMeter.readLightLevel();
+  //=============================================================================//
   
-  uploadData(200, 12, 5, h, t);
+  uploadData(lux, 12, 5, h, t);
   delay(5000);
 }
 
